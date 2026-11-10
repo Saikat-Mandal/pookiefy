@@ -410,3 +410,41 @@ html:has([data-scroll-locked="true"]) {
     box-shadow: none;
   }
 }
+
+@media (max-width: 767px) {
+  .story-panel {
+    position: relative;
+    top: auto;
+    min-height: auto;
+    padding-block: 3.5rem;
+    overflow: visible;
+    box-shadow: none;
+  }
+
+  .story-reveal,
+  .story-reveal .story-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .story-panel--opening {
+    min-height: 100svh;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 639px) {
+  .story-carousel--stacked {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    overflow: visible;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
+
+  .story-carousel--stacked > .story-item {
+    width: 100%;
+    min-width: 0;
+  }
+}

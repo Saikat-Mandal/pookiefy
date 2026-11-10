@@ -2,6 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Lenis from "lenis";
+import Image from "next/image";
+
+const UNLOCK_AT = "2026-11-11T23:11:00+05:30";
+// const UNLOCK_AT = "2026-11-10T23:59:00+05:30";
+const UNLOCK_TIME_ZONE = "Asia/Kolkata";
+
+const formattedUnlockTime = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: UNLOCK_TIME_ZONE,
+})
+  .format(new Date(UNLOCK_AT))
+  .replace(/\b(am|pm)\b/i, (meridiem) => meridiem.toUpperCase());
 
 /* --------------------------------------------------------------------------
    Hook: reveals section content once when it enters the viewport.
@@ -30,26 +46,68 @@ function useScrollReveal() {
 }
 
 /* ----------------------------------------------------------------
-   Songs — replace titles/artists with your own; swap the SVGs
-   for real album artwork when you're ready.
+   Songs — the play links open a YouTube Music search for each track.
+   The cover art is original SVG artwork made for these cards.
    ----------------------------------------------------------------- */
 const SONGS = [
-  { id: 1, title: "Placeholder song one", artist: "Artist name" },
-  { id: 2, title: "Placeholder song two", artist: "Artist name" },
-  { id: 3, title: "Placeholder song three", artist: "Artist name" },
+  {
+    id: 1,
+    title: "Purple",
+    artist: "Olivia Rodrigo",
+    colors: { start: "#3d2459", end: "#bd83b7", accent: "#f6d5e9" },
+    motif: "✦",
+  },
+  {
+    id: 2,
+    title: "Cigarettes",
+    artist: "Juice WRLD",
+    colors: { start: "#381d29", end: "#c75d4f", accent: "#ffc18b" },
+    motif: "✳",
+  },
+  {
+    id: 3,
+    title: "Wishlist",
+    artist: "Taylor Swift",
+    colors: { start: "#243c59", end: "#83a9bd", accent: "#f7e6be" },
+    motif: "✧",
+  },
 ];
 
 /* ----------------------------------------------------------------
    Photos — three empty Polaroid-style frames. Replace the SVGs
    with your own image files whenever you like.
    ----------------------------------------------------------------- */
-const PHOTO_COUNT = 3;
+const PHOTOS = ["/1.jpg", "/2.jpg", "/3.jpg"];
 
 export default function LoveLetter() {
+  const [timeUnlocked, setTimeUnlocked] = useState(false);
   const [wishMade, setWishMade] = useState(false);
   const [wishTransitioning, setWishTransitioning] = useState(false);
   const [wishShown, setWishShown] = useState(false);
   const [scrollShown, setScrollShown] = useState(false);
+
+  useEffect(() => {
+    const unlockTimestamp = new Date(UNLOCK_AT).getTime();
+
+    if (!Number.isFinite(unlockTimestamp)) {
+      console.error(`Invalid UNLOCK_AT value: ${UNLOCK_AT}`);
+      return;
+    }
+
+    const updateUnlockState = () => {
+      const unlocked = Date.now() >= unlockTimestamp;
+      setTimeUnlocked(unlocked);
+      return unlocked;
+    };
+
+    if (updateUnlockState()) return;
+
+    const intervalId = window.setInterval(() => {
+      if (updateUnlockState()) window.clearInterval(intervalId);
+    }, 10_000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     if (
@@ -89,6 +147,26 @@ export default function LoveLetter() {
   const [photosRef, photosRevealed] = useScrollReveal();
   const [songsRef, songsRevealed] = useScrollReveal();
   const [finalRef, finalRevealed] = useScrollReveal();
+
+  if (!timeUnlocked) {
+    return (
+      <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#5b2333] px-6 py-16 text-center text-[#f7f4f3]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_20%,rgba(242,67,51,0.22),transparent_55%)]" />
+        <div className="relative z-10 flex max-w-lg flex-col items-center">
+          <span className="mb-6 font-playfair text-5xl text-[#ffd1ca]" aria-hidden="true">
+            11:11
+          </span>
+          <h1 className="font-playfair text-[clamp(2rem,9vw,3.5rem)] font-light leading-tight">
+            nah nah not now HEHEHE
+          </h1>
+          <p className="mt-5 text-sm tracking-wide text-[#e4cfd0]">
+            Come back on{" "}
+            <time dateTime={UNLOCK_AT}>{formattedUnlockTime} IST</time>
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div
@@ -203,13 +281,15 @@ export default function LoveLetter() {
         >
           {/* EDIT: replace this paragraph with your own words */}
           <h2 className="font-playfair text-[clamp(2rem,7vw,3.5rem)] font-light tracking-tight leading-none text-foreground mb-10">
-            Memories
+            A small note 
           </h2>
           <p className="font-sans text-[clamp(1.1rem,2.4vw,1.4rem)] text-muted leading-relaxed max-w-lg">
-            Replace this paragraph with your own story — how you met, the little
-            things you love about her, the moments you want her to remember.
-            This space is entirely yours.
+            Well, I may not be there right now, but if I could, I'd be right beside you at 11:11, 
+            making the same wish and probably smiling at you like an idiot.
+            I don't know if 11:11 wishes actually come true, but if they do, I think I've already gotten mine.It's you.
+            Happy 11:11 BBG.
           </p>
+          <p className="pt-10"> Happy 11:11 bbg.</p>
         </div>
         <div className="mt-12 flex flex-col items-center">
           <div className="w-6 h-6 rounded-full border border-black/10 flex items-center justify-center animate-bounce-slow">
@@ -233,49 +313,30 @@ export default function LoveLetter() {
           } ${photosRevealed ? "is-visible" : ""}`}
         >
           <h2 className="font-playfair text-[clamp(1.75rem,6vw,2.75rem)] font-light tracking-tight text-foreground mb-14 text-center">
-            Our Memories
+            Some weird aah images for ya, cause i was incapable of thinking more content to add
           </h2>
           <div
             role="region"
-            aria-label="Photo memories, swipe to browse"
+            aria-label="Photo memories"
             tabIndex={0}
             data-lenis-prevent
-            className="story-carousel flex gap-5 overflow-x-auto pb-5 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:pb-0 max-w-[920px] mx-auto items-start"
+            className="story-carousel story-carousel--stacked flex gap-5 overflow-x-auto pb-5 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:pb-0 max-w-[920px] mx-auto items-start"
           >
-            {[...Array(PHOTO_COUNT)].map((_, i) => (
+            {PHOTOS.map((photo, i) => (
               <div
-                key={i}
+                key={photo}
                 style={{ transitionDelay: `${i * 120}ms` }}
                 className="story-item relative w-[min(72vw,290px)] shrink-0 snap-center aspect-[4/5] bg-card border border-border rounded-[9px] rounded-bl-[28px] p-5 pb-14 overflow-hidden group transition duration-500 ease-out hover:border-rose/60 hover:-rotate-[1.5deg] hover:scale-[1.02] sm:w-full"
               >
-                <div
-                  className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                >
-                  <span className="text-[10px] text-white/40 tracking-wide uppercase" aria-hidden="true">
-                    your photo here
-                  </span>
-                </div>
                 <div className="absolute bottom-0 left-6 right-6 h-[26px] bg-card" />
-                {/* EDIT: replace this SVG with <Image src="your-photo.jpg" /> */}
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 290 362"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  role="img"
-                  aria-label="Empty photo frame"
-                >
-                  <rect width="290" height="362" fill="#eaeaea" />
-                  <circle
-                    cx="145"
-                    cy="148"
-                    r="40"
-                    fill="none"
-                    stroke="#d4d4d4"
-                    strokeWidth={1}
-                    opacity={0.6}
-                  />
-                </svg>
+                <Image
+                  src={photo}
+                  alt={`Memory ${i + 1}`}
+                  width={290}
+                  height={362}
+                  sizes="(max-width: 639px) 90vw, (max-width: 920px) 30vw, 290px"
+                  className="h-full w-full object-cover"
+                />
               </div>
             ))}
           </div>
@@ -303,10 +364,10 @@ export default function LoveLetter() {
           </h2>
           <div
             role="region"
-            aria-label="Songs, swipe to browse"
+            aria-label="Songs"
             tabIndex={0}
             data-lenis-prevent
-            className="story-carousel flex gap-5 overflow-x-auto pb-5 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 max-w-[860px] mx-auto"
+            className="story-carousel story-carousel--stacked flex gap-5 overflow-x-auto pb-5 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0 max-w-[860px] mx-auto"
           >
             {SONGS.map((song) => (
               <article
@@ -315,25 +376,40 @@ export default function LoveLetter() {
                 className="story-item group w-[min(72vw,290px)] shrink-0 snap-center flex flex-col gap-3 px-5 py-5 bg-card border border-border rounded-2xl transition duration-500 ease-out hover:border-rose/50 hover:bg-[#eaeaea] md:w-full md:px-6 md:py-7"
               >
                 <div className="aspect-square relative bg-[#f2f2f2] rounded-xl overflow-hidden">
-                  {/* EDIT: replace this SVG with your album artwork */}
                   <svg
                     className="w-full h-full"
                     viewBox="0 0 300 300"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     role="img"
-                    aria-label="Album cover placeholder"
+                    aria-label={`Original cover art for ${song.title} by ${song.artist}`}
                   >
-                    <rect width="300" height="300" fill="#f5f5f5" stroke="#d4d4d4" strokeWidth={1} rx={10} />
-                    <circle cx="150" cy="150" r="30" fill="none" stroke="#d4d4d4" strokeWidth={1} opacity={0.4} />
-                    <circle cx="150" cy="150" r="4" fill="#999999" />
+                    <defs>
+                      <linearGradient id={`cover-${song.id}`} x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+                        <stop stopColor={song.colors.start} />
+                        <stop offset="1" stopColor={song.colors.end} />
+                      </linearGradient>
+                    </defs>
+                    <rect width="300" height="300" rx="10" fill={`url(#cover-${song.id})`} />
+                    <circle cx="150" cy="139" r="91" stroke={song.colors.accent} strokeOpacity=".35" />
+                    <circle cx="150" cy="139" r="70" stroke={song.colors.accent} strokeOpacity=".55" />
+                    <circle cx="150" cy="139" r="48" fill={song.colors.accent} fillOpacity=".14" />
+                    <path d="M37 225C96 177 204 178 263 225" stroke={song.colors.accent} strokeOpacity=".55" />
+                    <text x="150" y="160" fill={song.colors.accent} fontSize="48" textAnchor="middle">{song.motif}</text>
+                    <text x="150" y="249" fill="white" fontFamily="Georgia, serif" fontSize="21" letterSpacing="3" textAnchor="middle">{song.title.toUpperCase()}</text>
+                    <text x="150" y="273" fill="white" fillOpacity=".78" fontSize="9" letterSpacing="2" textAnchor="middle">{song.artist.toUpperCase()}</text>
                   </svg>
-                  <button
-                    className="absolute right-3 bottom-3 w-8 h-8 rounded-full bg-black/5 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black text-[10px] opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 focus-visible:outline-none"
-                    aria-label={`Play ${song.title}`}
+                  <a
+                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.title} ${song.artist}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute right-3 bottom-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-[#5b2333] shadow-lg transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#5b2333]"
+                    aria-label={`Search for ${song.title} by ${song.artist} on YouTube`}
                   >
-                    ▶
-                  </button>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="ml-0.5 h-5 w-5 fill-current">
+                      <path d="M8 5.5v13l10-6.5z" />
+                    </svg>
+                  </a>
                 </div>
                 <h3 className="font-playfair text-lg font-light tracking-tight text-foreground leading-none">
                   {song.title}
@@ -364,10 +440,10 @@ export default function LoveLetter() {
           } ${finalRevealed ? "is-visible" : ""}`}
         >
           <p className="font-playfair text-[clamp(1.5rem,5vw,2.5rem)] font-light leading-relaxed text-foreground max-w-md text-balance mb-3">
-            One day, we won't need a website for this.
+            Maybe someday, distance won't matter.
           </p>
           <p className="font-playfair text-[clamp(1.5rem,5vw,2.5rem)] font-light leading-relaxed text-rose max-w-md">
-            Because we'll be together.
+            Till then, HEHEHEHE
           </p>
         </div>
         <div className="mt-14 flex flex-col items-center" aria-hidden="true">
