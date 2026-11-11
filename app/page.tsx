@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Lenis from "lenis";
 import Image from "next/image";
 
-const UNLOCK_AT = "2026-11-11T23:11:00+05:30";
+const UNLOCK_AT = "2026-11-11T11:11:00+05:30";
 // const UNLOCK_AT = "2026-11-10T23:59:00+05:30";
 const UNLOCK_TIME_ZONE = "Asia/Kolkata";
 
@@ -360,7 +360,7 @@ export default function LoveLetter() {
           } ${songsRevealed ? "is-visible" : ""}`}
         >
           <h2 className="font-playfair text-[clamp(1.75rem,6vw,2.75rem)] font-light tracking-tight text-foreground mb-14 text-center">
-            Songs
+            Us?
           </h2>
           <div
             role="region"
